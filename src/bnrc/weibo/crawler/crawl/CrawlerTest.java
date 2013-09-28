@@ -3,8 +3,12 @@ package bnrc.weibo.crawler.crawl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import weibo4j.Timeline;
@@ -31,31 +35,35 @@ public class CrawlerTest {
 			}
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
 	
 	
-	// TODO: Only for test
+	// Only for test
 	public static void main(String[] args) {
 		//AccessToken.generate();
 		//AccessToken.getOneAccessToken();
-		weibo.setToken("2.00YFUEID0rPfuG150897b47arVwEEB");
-		WeiboInterImpl weiboInterImpl = new WeiboInterImpl();
-		
-		List<Status> statusList = weiboInterImpl.getStatusesByUserId("1985011167");
-		List<StatusBean> statusBeanList = new ArrayList<StatusBean>();
-		for (Status status : statusList) {
-			statusBeanList.add(StatusBean.getStatusBean(status));
-		}
-		DBOperation.insert2StatusesTable(statusBeanList);
-		
+//		weibo.setToken("2.00YFUEID0rPfuG150897b47arVwEEB");
+//		WeiboInterImpl weiboInterImpl = new WeiboInterImpl();
+//		
+//		List<Status> statusList = weiboInterImpl.getStatusesByUserId("1985011167", 300);
+//		List<StatusBean> statusBeanList = new ArrayList<StatusBean>();
+//		for (Status status : statusList) {
+//			statusBeanList.add(StatusBean.getStatusBean(status));
+//		}
+//		DBOperation.insert2StatusesTable(statusBeanList);
+//		
 //		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //		for (Status status : statusList) {
 //			System.out.println(status.getText());
 //			System.out.println(simpleDateFormat.format(status.getCreatedAt()));
 //		}
 		
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DAY_OF_MONTH, -5);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String time = simpleDateFormat.format(cal.getTime());
+		System.out.println(time);
 	}
 }

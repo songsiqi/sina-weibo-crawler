@@ -45,8 +45,8 @@ public class AccessToken {
 		}
 	}
 	
-	// 获取一个access_token供爬虫使用
-	public static void getOneAccessToken() {
+	// 设置一个access_token供爬虫使用
+	public static void setOneAccessToken() {
 		// 随机提供
 		Random rand = new Random();
 		int len = accessToken.size();

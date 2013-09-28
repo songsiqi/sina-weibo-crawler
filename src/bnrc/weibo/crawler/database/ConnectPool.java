@@ -27,8 +27,8 @@ public class ConnectPool
     private ConnectPool()
     {
         poolMaxSize = 50;
-        poolSteadySize = 30;
-        poolInitSize = 20;
+        poolSteadySize = 40;
+        poolInitSize = 30;
     	initPool();
     }
     

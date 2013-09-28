@@ -2,7 +2,11 @@ package bnrc.weibo.crawler.database;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import bnrc.weibo.crawler.model.*;
 
@@ -495,7 +499,7 @@ public class DBOperation {
 	
 	// ----- 获取待爬用户访问控制 -----
 	
-	// 获取待爬用户id，并设置数据库标记
+	// 获取待爬新用户id，并设置数据库标记
 	public static long getNewUserId() {
 		ConnectManager cm = null;
 		PreparedStatement pstmt = null;
@@ -538,8 +542,55 @@ public class DBOperation {
 		return userId;
 	}
 	
+	// 获取待重访用户信息，并设置数据库标记
+	public static Map<String, Object> getRevisitUser(float minStatusesFrequency, String maxNeedUpadteTime) {
+		ConnectManager cm = null;
+		PreparedStatement pstmt = null;
+		String sql = null;
+		Map<String, Object> map = new HashMap<String, Object>();
+		long userId = 0;
+		map.put("user_id", userId);
+		map.put("statuses_count", 0);
+		
+		try {
+			do {
+				cm = ConnectPool.getConnectPool().getConnectManager();
+			} while (cm == null);
+			sql = "select top 1 user_id,statuses_count from users where iteration>0 and visited=0 and statuses_frequency>" + minStatusesFrequency + " and update_time<'" + maxNeedUpadteTime + "' order by update_time asc;";
+			pstmt = cm.getConnection().prepareStatement(sql);
+			ResultSet rs = pstmt.executeQuery();
+			
+			while (rs.next()) {
+				userId = rs.getLong(1);
+				map.put("user_id", rs.getLong(1));
+				map.put("statuses_count", rs.getInt(2));
+			}
+			if (userId != 0) {
+				sql = "update users set visited=1 where user_id=?;";
+				pstmt = cm.getConnection().prepareStatement(sql);
+				pstmt.setLong(1, userId);
+				pstmt.executeUpdate();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("获取待爬用户错误！");
+		} finally {
+			// 关闭会话，释放连接
+			try {
+				if (pstmt != null) {
+					pstmt.close();
+				}
+				cm.release();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return map;
+	}
+	
 	// 爬取完成，设置数据库标记
-	public static void endNewUserId(long userId, boolean exist) {
+	public static void endVisitForUserId(long userId, boolean exist) {
 		ConnectManager cm = null;
 		PreparedStatement pstmt = null;
 		String sql = null;
@@ -561,7 +612,7 @@ public class DBOperation {
 			e.printStackTrace();
 			logger.error("爬取完成设置用户标记错误！");
 			
-			endNewUserId(userId, exist);
+			endVisitForUserId(userId, exist);
 		} finally {
 			// 关闭会话，释放连接
 			try {
