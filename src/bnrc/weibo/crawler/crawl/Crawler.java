@@ -45,6 +45,7 @@ public class Crawler {
 	private static int minDaysSinceLastVisit = 5;				// 最小重访时间间隔
 	private static Date lastRefreshRevisitConfigTime = null;	// 上次刷新token的时间
 	private static final int intervalOfRefreshRevisitConfig = 1000 * 60 * 60 * 1;	// 两次刷新重访配置之间的时间间隔
+	private static final int iterationInterval = 3;				// 重访次数为3的倍数时才重访用户的社会化关系和标签
 	
 	// 决定一次爬取是否为重访
 	public static boolean isRevisit() {
@@ -66,6 +67,7 @@ public class Crawler {
 		String userId = "0";
 		long uId = 0;
 		int previousStatusesCount = 0;
+		int iteration = 0;
 		
 		// 决定本地爬取是否为重访
 		boolean revisit = isRevisit();
@@ -93,6 +95,7 @@ public class Crawler {
 			Map<String, Object> userMap = DBOperation.getRevisitUser(minStatusesFrequency, maxNeedUpdateTime);
 			uId = (Long) userMap.get("user_id");
 			previousStatusesCount = (Integer) userMap.get("statuses_count"); // 数据库中用户的微博数
+			iteration = (Integer) userMap.get("iteration"); // 已经访问的次数
 			userId = String.valueOf(uId);
 			
 			// 如果没有符合要求的待重访用户，则改为爬取新用户
@@ -105,7 +108,7 @@ public class Crawler {
 				revisit = false;
 				logger.info("★★★★★正在爬取新用户" + userId + "★★★★★");
 			} else {
-				logger.info("☆☆☆☆☆正在重访用户" + userId + "☆☆☆☆☆");
+				logger.info("☆☆☆☆☆正在重访用户" + userId + "，已访问" + iteration + "次☆☆☆☆☆");
 			}
 		}
 
@@ -124,37 +127,42 @@ public class Crawler {
 			}
 			
 			// 爬取并存储用户社会化关系信息
-			logger.info("正在爬取用户" + userId + "的社会化关系信息");
-			AccessToken.setOneAccessToken();
-			relationCrawler.crawl(userId);
-			
-			try {
-				Thread.sleep(intervalOfRequest);
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (iteration % iterationInterval == 0) {
+				logger.info("正在爬取用户" + userId + "的社会化关系信息");
+				AccessToken.setOneAccessToken();
+				relationCrawler.crawl(userId);
+				
+				try {
+					Thread.sleep(intervalOfRequest);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			
 			// 爬取并存储用户微博信息
-			if (revisit) { // 若重访，则重新计算需要爬取的微博页数
-				statusPageLimit = (currentStatusesCount - previousStatusesCount) / 98 + 1;
-			} else {
-				statusPageLimit = maxStatusesPage;
-			}
-			logger.info("正在爬取用户" + userId + "的微博信息");
 			logger.info("原微博数：" + previousStatusesCount + "，现微博数：" + currentStatusesCount);
-			AccessToken.setOneAccessToken();
-			statusCrawler.crawl(userId, intervalOfRequest, statusPageLimit);
-			
-			try {
-				Thread.sleep(intervalOfRequest);
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (currentStatusesCount > previousStatusesCount) {
+				statusPageLimit = (currentStatusesCount - previousStatusesCount) / 100 + 1;
+				if (statusPageLimit > maxStatusesPage) { // 最多300页
+					statusPageLimit = maxStatusesPage;
+				}
+				logger.info("正在爬取用户" + userId + "的微博信息");
+				AccessToken.setOneAccessToken();
+				statusCrawler.crawl(userId, intervalOfRequest, statusPageLimit);
+				
+				try {
+					Thread.sleep(intervalOfRequest);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			
 			// 爬取并存储用户标签信息
-			logger.info("正在爬取用户" + userId + "的标签信息");
-			AccessToken.setOneAccessToken();
-			tagCrawler.crawl(userId);
+			if (iteration % iterationInterval == 0) {
+				logger.info("正在爬取用户" + userId + "的标签信息");
+				AccessToken.setOneAccessToken();
+				tagCrawler.crawl(userId);
+			}
 		}
 			
 		DBOperation.endVisitForUserId(uId, exist);
@@ -165,20 +173,22 @@ public class Crawler {
 			e.printStackTrace();
 		}
 		
-		// 检测是否需要刷新token，以及更新重访参数
 		Date currentTime = Calendar.getInstance().getTime();
+		
+		// 检测是否需要刷新token，以及更新重访参数
 		if (currentTime.getTime() - lastRefreshTokenTime.getTime() > intervalOfRefreshToken) {
 			AccessToken.generate();
-			lastRefreshTokenTime = Calendar.getInstance().getTime();
+			lastRefreshTokenTime = currentTime;
 		}
 		
 		// 检测是否需要更新重访参数
 		if (currentTime.getTime() - lastRefreshRevisitConfigTime.getTime() > intervalOfRefreshRevisitConfig) {
-			RevisitConfig.refresh();
-			revisitRatio = Float.valueOf(RevisitConfig.getProperty("revisit_ratio"));
-			minStatusesFrequency = Float.valueOf(RevisitConfig.getProperty("min_statuses_frequency"));
-			minDaysSinceLastVisit = Integer.valueOf(RevisitConfig.getProperty("min_days_since_last_visit"));
-			lastRefreshRevisitConfigTime = Calendar.getInstance().getTime();
+			RevisitConfig revisitConfig = new RevisitConfig();
+			Map<String, Object> configMap = revisitConfig.getConfig();
+			revisitRatio = (Float) configMap.get("revisit_ratio");
+			minStatusesFrequency = (Float) configMap.get("min_statuses_frequency");
+			minDaysSinceLastVisit = (Integer) configMap.get("min_days_since_last_visit");
+			lastRefreshRevisitConfigTime = currentTime;
 		}
 	}
 
@@ -196,21 +206,23 @@ public class Crawler {
 			DBOperation.insert2UsersTable(userIdBeanList);
 		}
 		
+		Date currentTime = Calendar.getInstance().getTime();
+		
 		// 生成token
 		AccessToken.generate();
-		lastRefreshTokenTime = Calendar.getInstance().getTime();
+		lastRefreshTokenTime = currentTime;
 		
 		// 重访参数设定
-		RevisitConfig.refresh();
-		revisitRatio = Float.valueOf(RevisitConfig.getProperty("revisit_ratio"));
-		minStatusesFrequency = Float.valueOf(RevisitConfig.getProperty("min_statuses_frequency"));
-		minDaysSinceLastVisit = Integer.valueOf(RevisitConfig.getProperty("min_days_since_last_visit"));
-		lastRefreshRevisitConfigTime = Calendar.getInstance().getTime();
+		RevisitConfig revisitConfig = new RevisitConfig();
+		Map<String, Object> configMap = revisitConfig.getConfig();
+		revisitRatio = (Float) configMap.get("revisit_ratio");
+		minStatusesFrequency = (Float) configMap.get("min_statuses_frequency");
+		minDaysSinceLastVisit = (Integer) configMap.get("min_days_since_last_visit");
+		lastRefreshRevisitConfigTime = currentTime;
 		
 		while (true) {
 			crawling();
 		}
-		
 	}
 	
 }

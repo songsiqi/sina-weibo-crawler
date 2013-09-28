@@ -53,7 +53,7 @@ public class WeiboInterImpl implements WeiboInter {
 				} else if (errorCode == -1) { // 新浪微博API提供数据出错
 					logger.error("新浪微博API提供数据出错");
 					try {
-						Thread.sleep(1000 * 60 * 30);
+						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 					}
@@ -97,7 +97,7 @@ public class WeiboInterImpl implements WeiboInter {
 				} else if (errorCode == -1) { // 新浪微博API提供数据出错
 					logger.error("新浪微博API提供数据出错");
 					try {
-						Thread.sleep(1000 * 60 * 30);
+						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 					}
@@ -141,7 +141,7 @@ public class WeiboInterImpl implements WeiboInter {
 				} else if (errorCode == -1) { // 新浪微博API提供数据出错
 					logger.error("新浪微博API提供数据出错");
 					try {
-						Thread.sleep(1000 * 60 * 30);
+						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 					}
@@ -158,43 +158,37 @@ public class WeiboInterImpl implements WeiboInter {
 	}
 
 	@Override
-	public List<Status> getStatusesByUserId(String userId, int intervalOfRequest, int pageLimit) {
+	public List<Status> getStatusesByUserId(String userId, int intervalOfRequest, int startPage, int endPage) {
 		List<Status> statusList = null;
 		
 		try {
 			Paging page = new Paging();
 			page.setCount(100);
-			int pageCount = 0;
-			while (true) {
-				pageCount++;
+			
+			for (int pageCount = startPage; pageCount <= endPage; pageCount++) {
 				logger.info("正在爬取微博第" + pageCount + "页");
-				
-				// 每10页变一次token
-				if (pageCount % 10 == 0) {
-					AccessToken.setOneAccessToken();
-				}
 				
 				page.setPage(pageCount);
 				if (statusList == null) {
 					statusList = timeline.getUserTimelineByUid(userId, page, 0, 0).getStatuses();
 				} else {
 					List<Status> temp = timeline.getUserTimelineByUid(userId, page, 0, 0).getStatuses();
-					if (temp == null || temp.size() == 0) {
-						break;
-					} else {
+					if (temp != null && temp.size() != 0) {
 						statusList.addAll(temp);
 					}	
 				}
 				
-				// 爬取微博的页数限制
-				if (pageCount == pageLimit) {
-					break;
+				// 每访问10次接口刷新一下token
+				if (pageCount % 10 == 0) {
+					AccessToken.setOneAccessToken();
 				}
 				
-				try {
-					Thread.sleep(intervalOfRequest);
-				} catch (Exception e) {
-					e.printStackTrace();
+				if (pageCount != endPage) {
+					try {
+						Thread.sleep(intervalOfRequest);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}		
 		} catch (Exception e) {
@@ -207,7 +201,7 @@ public class WeiboInterImpl implements WeiboInter {
 				if (errorCode == 10023) { // 用户请求频次超过上限
 					logger.error("用户请求频次超过上限");
 					AccessToken.setOneAccessToken();
-					return getStatusesByUserId(userId, intervalOfRequest, pageLimit);
+					return getStatusesByUserId(userId, intervalOfRequest, startPage, endPage);
 				} else if (errorCode == 10022) { // IP请求频次超过上限
 					logger.error("IP请求频次超过上限");
 					try {
@@ -215,15 +209,15 @@ public class WeiboInterImpl implements WeiboInter {
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 					}
-					return getStatusesByUserId(userId, intervalOfRequest, pageLimit);
+					return getStatusesByUserId(userId, intervalOfRequest, startPage, endPage);
 				} else if (errorCode == -1) { // 新浪微博API提供数据出错
 					logger.error("新浪微博API提供数据出错");
 					try {
-						Thread.sleep(1000 * 60 * 30);
+						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 					}
-					return getStatusesByUserId(userId, intervalOfRequest, pageLimit);
+					return getStatusesByUserId(userId, intervalOfRequest, startPage, endPage);
 				} else if (errorCode == 20003) { // 用户不存在
 					statusList = null;
 				}
@@ -263,7 +257,7 @@ public class WeiboInterImpl implements WeiboInter {
 				} else if (errorCode == -1) { // 新浪微博API提供数据出错
 					logger.error("新浪微博API提供数据出错");
 					try {
-						Thread.sleep(1000 * 60 * 30);
+						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 					}
@@ -307,7 +301,7 @@ public class WeiboInterImpl implements WeiboInter {
 				} else if (errorCode == -1) { // 新浪微博API提供数据出错
 					logger.error("新浪微博API提供数据出错");
 					try {
-						Thread.sleep(1000 * 60 * 30);
+						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 					}

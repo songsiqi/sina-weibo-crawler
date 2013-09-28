@@ -19,7 +19,7 @@ import bnrc.weibo.crawler.util.WeiboInterImpl;
  *
  */
 public class RelationCrawler {
-	WeiboInterImpl weiboInterImpl = new WeiboInterImpl();
+	private WeiboInterImpl weiboInterImpl = new WeiboInterImpl();
 	
 	// 爬取用户的社会化关系信息
 	public void crawl(String userId) {
@@ -88,7 +88,7 @@ public class RelationCrawler {
 	public static void main(String[] args) {
 		AccessToken.generate();
 		AccessToken.setOneAccessToken();
-		new RelationCrawler().crawl("1190573714");
+		new RelationCrawler().crawl("2007962507");
 	}
 	
 }

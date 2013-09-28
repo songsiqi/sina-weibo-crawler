@@ -33,7 +33,7 @@ public class DBOperation {
 				cm = ConnectPool.getConnectPool().getConnectManager();
 			} while (cm == null);
 			
-			//sql = "if not exists (select * from users where user_id=?) insert into users(user_id,iteration,update_time) values(?,?,?);";
+			//sql = "if not exists (select user_id from users where user_id=?) insert into users(user_id,iteration,update_time) values(?,?,?);";
 			
 			sql = "begin tran;";
 			sql += "update users set visited=visited where user_id=?;";
@@ -151,7 +151,7 @@ public class DBOperation {
 				cm = ConnectPool.getConnectPool().getConnectManager();
 			} while (cm == null);
 			
-			//sql = "if not exists (select * from user_relation where source_user_id=? and target_user_id=?) insert into user_relation(source_user_id,target_user_id,relation_state,iteration,update_time) values(?,?,?,?,?);";
+			//sql = "if not exists (select source_user_id,target_user_id from user_relation where source_user_id=? and target_user_id=?) insert into user_relation(source_user_id,target_user_id,relation_state,iteration,update_time) values(?,?,?,?,?);";
 			
 			sql = "begin tran;";
 			sql += "update user_relation set iteration=iteration where source_user_id=? and target_user_id=?;";
@@ -210,6 +210,12 @@ public class DBOperation {
 			sql += "if @@rowcount = 0 ";
 			sql += "insert into statuses(status_id,user_id,created_at,mid,content,source_url,source_name,favorited,truncated,in_reply_to_status_id,in_reply_to_user_id,in_reply_to_screen_name,thumbnail_pic,bmiddle_pic,original_pic,retweeted_status_id,geo_type,geo_coordinates_x,geo_coordinates_y,reposts_count,comments_count,mlevel,iteration,update_time) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 			sql += "commit tran;";
+			
+//			sql = "if not exists (select status_id from statuses where status_id=?) ";
+//			sql += "insert into statuses(status_id,user_id,created_at,mid,content,source_url,source_name,favorited,truncated,in_reply_to_status_id,in_reply_to_user_id,in_reply_to_screen_name,thumbnail_pic,bmiddle_pic,original_pic,retweeted_status_id,geo_type,geo_coordinates_x,geo_coordinates_y,reposts_count,comments_count,mlevel,iteration,update_time) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+//			sql += "else ";
+//			sql += "update statuses set user_id=?,created_at=?,mid=?,content=?,source_url=?,source_name=?,favorited=?,truncated=?,in_reply_to_status_id=?,in_reply_to_user_id=?,in_reply_to_screen_name=?,thumbnail_pic=?,bmiddle_pic=?,original_pic=?,retweeted_status_id=?,geo_type=?,geo_coordinates_x=?,geo_coordinates_y=?,reposts_count=?,comments_count=?,mlevel=?,iteration=?,update_time=? where status_id=?;";
+			
 			pstmt = cm.getConnection().prepareStatement(sql);
 			
 			for (StatusBean statusBean : statusBeanList) {
@@ -262,6 +268,58 @@ public class DBOperation {
 				pstmt.setInt(46, statusBean.getMlevel());
 				pstmt.setInt(47, statusBean.getIteration());
 				pstmt.setTimestamp(48, statusBean.getUpdateTime());
+				
+//				pstmt.setLong(1, statusBean.getStatusId());
+//				
+//				pstmt.setLong(2, statusBean.getStatusId());
+//				pstmt.setLong(3, statusBean.getUserId());
+//				pstmt.setTimestamp(4, statusBean.getCreatedAt());
+//				pstmt.setLong(5, statusBean.getMid());
+//				pstmt.setString(6, statusBean.getContent());
+//				pstmt.setString(7, statusBean.getSourceUrl());
+//				pstmt.setString(8, statusBean.getSourceName());
+//				pstmt.setBoolean(9, statusBean.isFavorited());
+//				pstmt.setBoolean(10, statusBean.isTruncated());
+//				pstmt.setLong(11, statusBean.getInReplyToStatusId());
+//				pstmt.setLong(12, statusBean.getInReplyToUserId());
+//				pstmt.setString(13, statusBean.getInReplyToScreenName());
+//				pstmt.setString(14, statusBean.getThumbnailPic());
+//				pstmt.setString(15, statusBean.getBmiddlePic());
+//				pstmt.setString(16, statusBean.getOriginalPic());
+//				pstmt.setLong(17, statusBean.getRetweetedStatusId());
+//				pstmt.setString(18, statusBean.getGeoType());
+//				pstmt.setDouble(19, statusBean.getGeoCoordinatesX());
+//				pstmt.setDouble(20, statusBean.getGeoCoordinatesY());
+//				pstmt.setInt(21, statusBean.getRepostsCount());
+//				pstmt.setInt(22, statusBean.getCommentsCount());
+//				pstmt.setInt(23, statusBean.getMlevel());
+//				pstmt.setInt(24, statusBean.getIteration());
+//				pstmt.setTimestamp(25, statusBean.getUpdateTime());
+//				
+//				pstmt.setLong(26, statusBean.getUserId());
+//				pstmt.setTimestamp(27, statusBean.getCreatedAt());
+//				pstmt.setLong(28, statusBean.getMid());
+//				pstmt.setString(29, statusBean.getContent());
+//				pstmt.setString(30, statusBean.getSourceUrl());
+//				pstmt.setString(31, statusBean.getSourceName());
+//				pstmt.setBoolean(32, statusBean.isFavorited());
+//				pstmt.setBoolean(33, statusBean.isTruncated());
+//				pstmt.setLong(34, statusBean.getInReplyToStatusId());
+//				pstmt.setLong(35, statusBean.getInReplyToUserId());
+//				pstmt.setString(36, statusBean.getInReplyToScreenName());
+//				pstmt.setString(37, statusBean.getThumbnailPic());
+//				pstmt.setString(38, statusBean.getBmiddlePic());
+//				pstmt.setString(39, statusBean.getOriginalPic());
+//				pstmt.setLong(40, statusBean.getRetweetedStatusId());
+//				pstmt.setString(41, statusBean.getGeoType());
+//				pstmt.setDouble(42, statusBean.getGeoCoordinatesX());
+//				pstmt.setDouble(43, statusBean.getGeoCoordinatesY());
+//				pstmt.setInt(44, statusBean.getRepostsCount());
+//				pstmt.setInt(45, statusBean.getCommentsCount());
+//				pstmt.setInt(46, statusBean.getMlevel());
+//				pstmt.setInt(47, statusBean.getIteration());
+//				pstmt.setTimestamp(48, statusBean.getUpdateTime());
+//				pstmt.setLong(49, statusBean.getStatusId());
 				
 				pstmt.addBatch();
 			}
@@ -444,7 +502,7 @@ public class DBOperation {
 	
 	// ----- tags表 -----
 	
-	//将数据插入到tags表中，批量插入
+	// 将数据插入到tags表中，批量插入
 	public static void insert2TagsTable(List<TagBean> tagBeanList) {
 		ConnectManager cm = null;
 		PreparedStatement pstmt = null;
@@ -511,7 +569,7 @@ public class DBOperation {
 				cm = ConnectPool.getConnectPool().getConnectManager();
 			} while (cm == null);
 			
-			sql = "select top 1 user_id from users where iteration=0 and visited=0 order by update_time asc;";
+			sql = "select top 2 user_id from users where iteration=0 and visited=0 order by update_time asc;";
 			pstmt = cm.getConnection().prepareStatement(sql);
 			ResultSet rs = pstmt.executeQuery();
 			
@@ -551,12 +609,13 @@ public class DBOperation {
 		long userId = 0;
 		map.put("user_id", userId);
 		map.put("statuses_count", 0);
+		map.put("iteration", 0);
 		
 		try {
 			do {
 				cm = ConnectPool.getConnectPool().getConnectManager();
 			} while (cm == null);
-			sql = "select top 1 user_id,statuses_count from users where iteration>0 and visited=0 and statuses_frequency>" + minStatusesFrequency + " and update_time<'" + maxNeedUpadteTime + "' order by update_time asc;";
+			sql = "select top 2 user_id,statuses_count,iteration from users where iteration>0 and visited=0 and statuses_frequency>" + minStatusesFrequency + " and update_time<'" + maxNeedUpadteTime + "' order by update_time asc;";
 			pstmt = cm.getConnection().prepareStatement(sql);
 			ResultSet rs = pstmt.executeQuery();
 			
@@ -564,6 +623,7 @@ public class DBOperation {
 				userId = rs.getLong(1);
 				map.put("user_id", rs.getLong(1));
 				map.put("statuses_count", rs.getInt(2));
+				map.put("iteration", rs.getInt(3));
 			}
 			if (userId != 0) {
 				sql = "update users set visited=1 where user_id=?;";

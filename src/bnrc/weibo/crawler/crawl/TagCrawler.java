@@ -20,7 +20,7 @@ import bnrc.weibo.crawler.util.WeiboInterImpl;
  */
 public class TagCrawler {
 	
-	WeiboInterImpl weiboInterImpl = new WeiboInterImpl();
+	private WeiboInterImpl weiboInterImpl = new WeiboInterImpl();
 	
 	// 爬取用户的标签信息
 	public void crawl(String userId) {

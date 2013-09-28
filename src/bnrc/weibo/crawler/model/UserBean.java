@@ -341,7 +341,11 @@ public class UserBean {
     	userBean.setBiFollowersCount(user.getBiFollowersCount());
     	userBean.setRemark(user.getRemark());
     	userBean.setLang(user.getLang());
-    	userBean.setVerifiedReason(user.getVerifiedReason());
+    	String verifiedReason = user.getVerifiedReason();
+    	if (verifiedReason.length() > 50) {
+    		verifiedReason = verifiedReason.substring(0, 50);
+    	}
+    	userBean.setVerifiedReason(verifiedReason);
     	userBean.setWeihao(user.getWeihao());
     	userBean.setGeoEnabled(user.isGeoEnabled());
     	Date currentTime = Calendar.getInstance().getTime();

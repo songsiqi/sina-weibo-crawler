@@ -17,7 +17,7 @@ public interface WeiboInter {
 	public String[] getFolloweesIdsByUserId(String userId);
 	
 	//根据用户id获取用户的微博列表
-	public List<Status> getStatusesByUserId(String userId, int intervalOfRequest, int pageLimit);
+	public List<Status> getStatusesByUserId(String userId, int intervalOfRequest, int startPage, int endPage);
 	
 	//根据微博id获取微博的评论列表（可提取评论用户的id）
 	public List<Comment> getCommentsByStatusId(String statusId);

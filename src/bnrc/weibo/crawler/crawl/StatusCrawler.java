@@ -17,14 +17,40 @@ import bnrc.weibo.crawler.util.WeiboInterImpl;
  */
 public class StatusCrawler {
 	
-	WeiboInterImpl weiboInterImpl = new WeiboInterImpl();
+	private WeiboInterImpl weiboInterImpl = new WeiboInterImpl();
+	
+	// 爬取用户的微博信息
+//	public void crawl(String userId, int intervalOfRequest, int pageLimit) {
+//		List<Status> statusList = weiboInterImpl.getStatusesByUserId(userId, intervalOfRequest, pageLimit);
+//		if (statusList != null) {
+//			// 开启一个存储线程
+//			new SaveStatusesThread(statusList).start();
+//		}
+//	}
 	
 	// 爬取用户的微博信息
 	public void crawl(String userId, int intervalOfRequest, int pageLimit) {
-		List<Status> statusList = weiboInterImpl.getStatusesByUserId(userId, intervalOfRequest, pageLimit);
-		if (statusList != null) {
-			// 开启一个存储线程
-			new SaveStatusesThread(statusList).start();
+		int pagesPerTime = 30;
+		int start = 0;
+		int end = 0;
+		
+		// 每爬30页，就存储一次
+		while (true) {
+			start = end + 1;
+			end += pagesPerTime;
+			if (end > pageLimit) {
+				end = pageLimit;
+			}
+			
+			List<Status> statusList = weiboInterImpl.getStatusesByUserId(userId, intervalOfRequest, start, end);
+			if (statusList != null) {
+				// 开启一个存储线程
+				new SaveStatusesThread(statusList).start();
+			}
+			
+			if (end == pageLimit) {
+				break;
+			}
 		}
 	}
 	
@@ -42,18 +68,6 @@ public class StatusCrawler {
 				statusBeanList.add(StatusBean.getStatusBean(status));
 			}
 			DBOperation.insert2StatusesTable(statusBeanList);
-//			for (StatusBean s : statusBeanList) {
-//				if (s.getContent().length() > 130) {
-//					System.out.println(s.getStatusId());
-//					System.out.println(s.getContent());
-//					System.out.println(s.getSourceUrl());
-//					System.out.println(s.getSourceName());
-//					System.out.println(s.getInReplyToScreenName());
-//					System.out.println(s.getThumbnailPic());
-//					System.out.println(s.getBmiddlePic());
-//					System.out.println(s.getOriginalPic());
-//				}
-//			}
 		}
 	}
 	
@@ -64,7 +78,7 @@ public class StatusCrawler {
 	public static void main(String[] args) {
 		AccessToken.generate();
 		AccessToken.setOneAccessToken();
-		new StatusCrawler().crawl("1190573714", 5 * 1000, 3);
+		new StatusCrawler().crawl("1190573714", 5 * 1000, 100);
 	}
 	
 }
