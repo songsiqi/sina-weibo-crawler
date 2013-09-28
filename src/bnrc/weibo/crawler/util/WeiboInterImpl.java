@@ -50,8 +50,8 @@ public class WeiboInterImpl implements WeiboInter {
 						e1.printStackTrace();
 					}
 					return getUserById(userId);
-				} else if (errorCode == -1) { // 新浪微博API提供数据出错
-					logger.error("新浪微博API提供数据出错");
+				} else if (errorCode == -1) { // 网络连接断开
+					logger.error("网络连接断开");
 					try {
 						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
@@ -94,8 +94,8 @@ public class WeiboInterImpl implements WeiboInter {
 						e1.printStackTrace();
 					}
 					return getFollowersIdsByUserId(userId);
-				} else if (errorCode == -1) { // 新浪微博API提供数据出错
-					logger.error("新浪微博API提供数据出错");
+				} else if (errorCode == -1) { // 网络连接断开
+					logger.error("网络连接断开");
 					try {
 						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
@@ -138,8 +138,8 @@ public class WeiboInterImpl implements WeiboInter {
 						e1.printStackTrace();
 					}
 					return getFolloweesIdsByUserId(userId);
-				} else if (errorCode == -1) { // 新浪微博API提供数据出错
-					logger.error("新浪微博API提供数据出错");
+				} else if (errorCode == -1) { // 网络连接断开
+					logger.error("网络连接断开");
 					try {
 						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
@@ -210,8 +210,8 @@ public class WeiboInterImpl implements WeiboInter {
 						e1.printStackTrace();
 					}
 					return getStatusesByUserId(userId, intervalOfRequest, startPage, endPage);
-				} else if (errorCode == -1) { // 新浪微博API提供数据出错
-					logger.error("新浪微博API提供数据出错");
+				} else if (errorCode == -1) { // 网络连接断开
+					logger.error("网络连接断开");
 					try {
 						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
@@ -254,8 +254,8 @@ public class WeiboInterImpl implements WeiboInter {
 						e1.printStackTrace();
 					}
 					return getCommentsByStatusId(statusId);
-				} else if (errorCode == -1) { // 新浪微博API提供数据出错
-					logger.error("新浪微博API提供数据出错");
+				} else if (errorCode == -1) { // 网络连接断开
+					logger.error("网络连接断开");
 					try {
 						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
@@ -298,8 +298,8 @@ public class WeiboInterImpl implements WeiboInter {
 						e1.printStackTrace();
 					}
 					return getTagsByUserId(userId);
-				} else if (errorCode == -1) { // 新浪微博API提供数据出错
-					logger.error("新浪微博API提供数据出错");
+				} else if (errorCode == -1) { // 网络连接断开
+					logger.error("网络连接断开");
 					try {
 						Thread.sleep(1000 * 60 * 1);
 					} catch (InterruptedException e1) {
